@@ -281,6 +281,7 @@
                 <button class="filter-btn" data-filter="video">视频</button>
             </div>
             <div class="action-btns">
+                <button class="action-btn" id="refreshBtn" title="重新扫描媒体文件夹">🔄 刷新</button>
                 <button class="action-btn" id="selectAllBtn" style="display:none;">全选</button>
                 <button class="action-btn delete" id="deleteBtn" style="display:none;">删除</button>
             </div>
@@ -332,7 +333,8 @@
             panStartY: 0,
             panStartTranslateX: 0,
             panStartTranslateY: 0,
-            isZoomed: false
+            isZoomed: false,
+            cacheBust: Date.now()
         };
         let deferredPrompt;
 
@@ -511,6 +513,7 @@
             });
             if (currentDate) html += '</div></div>';
             document.getElementById('content').innerHTML = html;
+            document.querySelectorAll('#content img').forEach(function(i) { var s = i.src.split('?')[0]; i.src = s + '?t=' + state.cacheBust; });
             updateActionButtons();
         }
 
@@ -936,6 +939,7 @@
 
         // ==================== Buttons ====================
         document.getElementById('selectModeBtn').addEventListener('click', toggleSelectMode);
+        document.getElementById('refreshBtn').addEventListener('click', refreshFiles);
         document.getElementById('selectAllBtn').addEventListener('click', selectAll);
         document.getElementById('deleteBtn').addEventListener('click', deleteSelected);
 
@@ -963,6 +967,14 @@
             document.getElementById('installBanner').classList.remove('show');
             localStorage.setItem('installDismissed', 'true');
         });
+
+        function refreshFiles() {
+            state.cacheBust = Date.now();
+            state.allMedia = [];
+            showSkeleton();
+            hideStatus();
+            load();
+        }
 
         // ==================== Init ====================
         generateSkeleton();
