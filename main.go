@@ -1,4 +1,4 @@
-
+﻿
 package main
 
 import (
@@ -288,6 +288,15 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 			if err := os.Remove(filePath); err == nil {
 				deleted++
 				os.Remove(thumbPath)
+				// 同时从内存索引中移除
+				indexMutex.Lock()
+				for i, f := range mediaIndex {
+					if f.Path == fileName {
+						mediaIndex = append(mediaIndex[:i], mediaIndex[i+1:]...)
+						break
+					}
+				}
+				indexMutex.Unlock()
 			} else {
 				failed++
 				log.Printf("Failed to delete %s: %v", filePath, err)

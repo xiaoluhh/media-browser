@@ -1,4 +1,4 @@
-
+﻿
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -615,6 +615,8 @@
             const item = state.filteredMedia[state.currentIndex];
             const encodedPath = encodeURIComponent(item.path);
             const container = document.getElementById('lightboxContent');
+            // 先停掉所有视频再清空
+            container.querySelectorAll('video').forEach(v => { v.pause(); v.src = ''; v.load(); });
             container.innerHTML = '';
             document.getElementById('lightboxCounter').textContent = (state.currentIndex + 1) + ' / ' + state.filteredMedia.length;
             document.getElementById('lightbox').classList.add('active');
@@ -632,7 +634,7 @@
                 video.playsInline = true;
                 video.preload = 'auto';
                 video.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000;';
-                video.innerHTML = '<source src="/api/file/' + encodedPath + '" type="video/mp4">';
+                video.innerHTML = '<source src="/api/file/' + encodedPath + '" >';
                 video.onerror = () => {
                     container.innerHTML = '<div class="video-error">无法播放此视频<br><button onclick="navigate(1)">下一个</button></div>';
                 };
@@ -643,7 +645,7 @@
                 wrapper.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;';
                 const img = document.createElement('img');
                 img.src = '/api/file/' + encodedPath;
-                img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in;transition:transform 0.2s ease;user-select:none;-webkit-user-select:none;';
+                img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in;transition:transform 0.2s ease;user-select:none;-webkit-user-select:none;will-change:transform;';
                 img.draggable = false;
                 img.onerror = () => {
                     wrapper.innerHTML = '<div class="video-error" style="color:#fff;">无法加载此图片<br><small>文件可能已损坏或过大</small><br><button onclick="navigate(1)">下一个</button></div>';
@@ -675,6 +677,7 @@
                 // Double-click to reset
                 img.addEventListener('dblclick', (e) => {
                     e.preventDefault();
+                    removePanHandlers();
                     state.currentScale = 1;
                     state.translateX = 0;
                     state.translateY = 0;
@@ -700,6 +703,7 @@
                         return;
                     }
                     e.preventDefault();
+                    img.style.transition = 'none';
                     img.setPointerCapture(e.pointerId);
                     pointerId = e.pointerId;
                     dragStartX = e.clientX;
@@ -726,6 +730,7 @@
                         img.style.cursor = 'grab';
                     }
                     isDragging = false;
+                    img.style.transition = 'transform 0.2s ease';
                 }
 
                 // Only enable pan when zoomed - use different handling
@@ -796,15 +801,16 @@
         }
 
         function closeLightbox() {
+            if (window._removePan) window._removePan();
             const video = document.querySelector('#lightboxContent video');
-            if (video) video.pause();
+            if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
             document.getElementById('lightbox').classList.remove('active');
             document.body.style.overflow = '';
         }
 
         function navigate(delta) {
             const video = document.querySelector('#lightboxContent video');
-            if (video) video.pause();
+            if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
             state.currentIndex = (state.currentIndex + delta + state.filteredMedia.length) % state.filteredMedia.length;
             openLightbox();
         }

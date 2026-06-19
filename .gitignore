@@ -18,3 +18,5 @@ Thumbs.db
 .idea/
 .vscode/
 *.iml
+
+# SSH keys.sshkey*
