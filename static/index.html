@@ -438,7 +438,7 @@
             showSkeleton();
             document.getElementById('mainContainer').style.display = 'block';
             try {
-                const res = await fetch('/api/dates');
+                const res = await fetch('/api/dates?t=' + Date.now());
                 const data = await res.json();
                 if (!data.dates || data.dates.length === 0) {
                     hideSkeleton();
@@ -968,12 +968,13 @@
             localStorage.setItem('installDismissed', 'true');
         });
 
-        function refreshFiles() {
+        async function refreshFiles() {
             state.cacheBust = Date.now();
             state.allMedia = [];
             showSkeleton();
             hideStatus();
-            load();
+            try { await fetch('/api/refresh'); } catch(e) {}
+            try { await load(); } catch(e) { console.error('Refresh failed', e); }
         }
 
         // ==================== Init ====================

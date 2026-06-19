@@ -45,7 +45,7 @@ var (
 	lastScan     time.Time
 	scanInterval = time.Hour
 	videoExts    = map[string]bool{".mp4": true, ".avi": true, ".mov": true, ".mkv": true, ".webm": true}
-	imageExts    = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true, ".jpeg.jpg": true}
+	imageExts    = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true, ".jpeg.jpg": true, ".bmp": true, ".svg": true, ".avif": true, ".ico": true, ".tiff": true, ".tif": true, ".heic": true, ".heif": true}
 	thumbSize    = 400
 	ffmpegPath   string
 )
@@ -150,6 +150,7 @@ func main() {
 	http.HandleFunc("/api/files/", filesHandler)
 	http.HandleFunc("/api/file/", fileHandler)
 	http.HandleFunc("/api/delete", deleteHandler)
+	http.HandleFunc("/api/refresh", refreshHandler)
 	http.HandleFunc("/thumb/", thumbHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -311,6 +312,18 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 		"success": true,
 		"deleted": deleted,
 		"failed":  failed,
+	})
+}
+
+func refreshHandler(w http.ResponseWriter, r *http.Request) {
+	go func() {
+		scanFiles()
+		go generateAllThumbnails()
+	}()
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "ok",
+		"total":  len(mediaIndex),
 	})
 }
 
