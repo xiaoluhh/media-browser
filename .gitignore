@@ -1,0 +1,20 @@
+﻿# Compiled binaries
+media-browser
+media-browser-*
+*.exe
+
+# Auto-generated
+thumbs/
+media_index.json
+media_index_*.json
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.idea/
+.vscode/
+*.iml
