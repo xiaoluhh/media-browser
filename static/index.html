@@ -1,4 +1,4 @@
-﻿
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -111,10 +111,10 @@
         .date-section { margin-bottom: 30px; }
         .date-header { font-size: 18px; font-weight: 600; padding: 12px 0; color: #888; display: flex; align-items: center; gap: 10px; }
         .photo-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 0; }
-        .photo-item { aspect-ratio: 1; overflow: hidden; cursor: pointer; background: #1a1a1a; position: relative; user-select: none; transition: transform 0.1s ease; content-visibility: auto; contain: layout style paint; }
+        .photo-item { aspect-ratio: 1; overflow: hidden; cursor: pointer; background: #1a1a1a; position: relative; user-select: none; transition: transform 0.1s ease; }
         .photo-item:active { transform: scale(0.95); }
         .photo-item.long-press { transform: scale(0.9); opacity: 0.7; }
-        .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; image-rendering: -webkit-optimize-contrast; }
         .photo-item.selected { outline: 3px solid #667eea; z-index: 10; }
         .photo-item.selected::after {
             content: '✓';
@@ -165,7 +165,7 @@
         .video-error button { margin-top: 10px; padding: 10px 20px; background: #333; border: none; color: #fff; border-radius: 8px; cursor: pointer; }
         .lightbox-close { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #fff; cursor: pointer; transition: all 0.2s; z-index: 1010; }
         .lightbox-close:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
-        .lightbox-nav { position: fixed; top: 50%; transform: translateY(-50%); width: 76px; height: 76px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #fff; cursor: pointer; transition: background 0.2s; z-index: 1010; }
+        .lightbox-nav { position: fixed; top: 50%; transform: translateY(-50%); width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50px; color: #fff; cursor: pointer; transition: background 0.2s; z-index: 1010; }
         .lightbox-nav:hover { background: rgba(255,255,255,0.2); }
         .lightbox-nav.prev { left: 20px; }
         .lightbox-nav.next { right: 20px; }
@@ -192,6 +192,8 @@
             transform: scale(1.1); 
         }
         .close-hint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 14px; white-space: nowrap; z-index: 1010; }
+        .delete-toast { position: fixed; top: 15%; left: 50%; transform: translate(-50%, 0); background: rgba(0,0,0,0.85); color: #fff; padding: 16px 32px; border-radius: 12px; font-size: 18px; font-weight: 600; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .delete-toast.show { opacity: 1; }
 
         .select-hint { background: rgba(102,126,234,0.2); padding: 8px 16px; border-radius: 20px; font-size: 14px; }
         .zoom-hint { background: rgba(102,126,234,0.2); padding: 8px 16px; border-radius: 20px; font-size: 14px; margin-left: auto; }
@@ -205,59 +207,15 @@
             .action-btn { padding: 8px 16px; font-size: 14px; }
             .play-indicator { width: 28px; height: 28px; font-size: 14px; } 
             .lightbox-close { width: 45px; height: 45px; font-size: 26px; top: 15px; right: 15px; }
-            .lightbox-nav { width: 58px; height: 58px; font-size: 32px; }
+            .lightbox-nav { width: 45px; height: 45px; font-size: 24px; }
             .lightbox-nav.prev { left: 10px; }
             .lightbox-nav.next { right: 10px; }
             h1 { font-size: 28px; }
             .container { padding: 15px; }
             .header { gap: 10px; }
         }
-        /* ========= Skeleton ========= */
-        .skeleton-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 0; padding: 20px 0; }
-        .skeleton-item { aspect-ratio: 1; background: #1a1a1a; position: relative; overflow: hidden; }
-        .skeleton-item::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { to { left: 100%; } }
-        .skeleton-header { height: 24px; width: 180px; background: #222; border-radius: 6px; margin: 20px 0 12px 0; position: relative; overflow: hidden; }
-        .skeleton-header::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shimmer 1.5s infinite; }
-        /* ========= Status ========= */
-        .status-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; color: #666; }
-        .status-state.visible { display: flex; }
-        .status-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
-        .status-title { font-size: 20px; font-weight: 600; color: #888; margin-bottom: 8px; }
-        .status-desc { font-size: 14px; color: #555; margin-bottom: 24px; max-width: 400px; line-height: 1.5; }
-        .status-btn { padding: 10px 28px; background: #333; border: none; color: #aaa; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-        .status-btn:hover { background: #444; color: #fff; }
-        /* ========= Dialog ========= */
-        .dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 99999; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
-        .dialog-overlay.active { display: flex; }
-        .dialog-box { background: #1e1e1e; border-radius: 16px; padding: 28px; max-width: 420px; width: 88vw; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: dialogIn 0.2s ease; }
-        @keyframes dialogIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .dialog-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .dialog-title .dlg-icon { font-size: 22px; }
-        .dialog-body { font-size: 14px; color: #aaa; line-height: 1.6; margin-bottom: 24px; }
-        .dialog-body .dlg-path { color: #666; font-size: 12px; word-break: break-all; margin-top: 8px; padding: 8px 12px; background: #111; border-radius: 8px; }
-        .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
-        .dialog-actions button { padding: 10px 24px; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .dialog-btn-cancel { background: #333; color: #888; }
-        .dialog-btn-cancel:hover { background: #444; color: #fff; }
-        .dialog-btn-confirm { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
-        .dialog-btn-confirm:hover { filter: brightness(1.15); }
-        .dialog-btn-confirm.danger { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-        .dialog-btn-confirm.danger:hover { filter: brightness(1.15); }
-        /* ========= Pan ========= */
-        .lightbox-content img.grabbing { cursor: grabbing; }
-        /* ========= Toast ========= */
-        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99998; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
-        .toast { padding: 12px 24px; background: #333; color: #fff; border-radius: 12px; font-size: 14px; font-weight: 500; animation: toastIn 0.25s ease, toastOut 0.25s ease 2.5s forwards; pointer-events: auto; }
-        .toast.success { background: #27ae60; }
-        .toast.error { background: #e74c3c; }
-        @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
-        @media (max-width: 1400px) { .skeleton-grid { grid-template-columns: repeat(7, 1fr); } }
-        @media (max-width: 1200px) { .skeleton-grid { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width: 900px) { .skeleton-grid { grid-template-columns: repeat(5, 1fr); } }
-        @media (max-width: 600px) { .skeleton-grid { grid-template-columns: repeat(4, 1fr); } }
-    </style></head>
+    </style>
+</head>
 <body>
     <div class="install-banner" id="installBanner">
         <div class="install-banner-content">
@@ -281,14 +239,9 @@
                 <button class="filter-btn" data-filter="video">视频</button>
             </div>
             <div class="action-btns">
-                <button class="action-btn" id="refreshBtn" title="重新扫描媒体文件夹">🔄 刷新</button>
                 <button class="action-btn" id="selectAllBtn" style="display:none;">全选</button>
                 <button class="action-btn delete" id="deleteBtn" style="display:none;">删除</button>
             </div>
-        </div>
-        <div id="skeletonArea">
-            <div class="skeleton-header"></div>
-            <div class="skeleton-grid" id="skeletonGrid"></div>
         </div>
         <div id="content"></div>
     </div>
@@ -301,334 +254,287 @@
         <div class="lightbox-delete" id="lightboxDeleteBtn" title="删除此图片">🗑️</div>
         <div class="close-hint" id="lightboxHint">双指缩放 | 点击关闭 | 滑动翻页</div>
     </div>
-    <div class="toast-container" id="toastContainer"></div>
-    <div class="dialog-overlay" id="dialogOverlay">
-        <div class="dialog-box">
-            <div class="dialog-title"><span class="dlg-icon" id="dialogIcon"></span><span id="dialogTitle"></span></div>
-            <div class="dialog-body" id="dialogBody"></div>
-            <div class="dialog-actions" id="dialogActions"></div>
-        </div>
-    </div>
-    <div class="status-state" id="statusState">
-        <div class="status-icon" id="statusIcon"></div>
-        <div class="status-title" id="statusTitle"></div>
-        <div class="status-desc" id="statusDesc"></div>
-        <button class="status-btn" id="statusBtn"></button>
-    </div>
+    <div class="delete-toast" id="deleteToast">✅ 删除成功！</div>
     <script>
-        // ==================== State ====================
-        const state = {
-            allMedia: [],
-            filteredMedia: [],
-            currentIndex: 0,
-            currentFilter: 'all',
-            selectMode: false,
-            selectedFiles: new Set(),
-            currentScale: 1,
-            initialPinchScale: 1,
-            translateX: 0,
-            translateY: 0,
-            isPanning: false,
-            panStartX: 0,
-            panStartY: 0,
-            panStartTranslateX: 0,
-            panStartTranslateY: 0,
-            isZoomed: false,
-            cacheBust: Date.now()
-        };
         let deferredPrompt;
-
-        // ==================== Toast ====================
-        function showToast(msg, type) {
-            const el = document.createElement('div');
-            el.className = 'toast' + (type ? ' ' + type : '');
-            el.textContent = msg;
-            document.getElementById('toastContainer').appendChild(el);
-            setTimeout(() => { if (el.parentNode) el.remove(); }, 2800);
+        let allMedia = [], filteredMedia = [], currentIndex = 0, currentFilter = 'all';
+        let touchStartX = 0, touchStartY = 0, touchStartTime = 0, ignoreSwipe = false;
+        const EDGE_THRESHOLD = 70;
+        const SWIPE_THRESHOLD = 80;
+        const TIME_THRESHOLD = 350;
+        let selectMode = false, selectedFiles = new Set();
+        let currentScale = 1, initialPinchScale = 1;
+        
+        function safePath(p) {
+            return p.split('/').map(encodeURIComponent).join('/');
         }
-
-        // ==================== Dialog ====================
-        function showConfirm(opts) {
-            return new Promise((resolve) => {
-                const overlay = document.getElementById('dialogOverlay');
-                document.getElementById('dialogIcon').textContent = opts.icon || '⚠️';
-                document.getElementById('dialogTitle').textContent = opts.title || '确认';
-                document.getElementById('dialogBody').innerHTML = (opts.message || '') +
-                    (opts.path ? '<div class="dlg-path">' + opts.path + '</div>' : '');
-                const actions = document.getElementById('dialogActions');
-                actions.innerHTML = '';
-                if (opts.cancelText !== null) {
-                    const cancel = document.createElement('button');
-                    cancel.className = 'dialog-btn-cancel';
-                    cancel.textContent = opts.cancelText || '取消';
-                    cancel.onclick = () => { overlay.classList.remove('active'); resolve(false); };
-                    actions.appendChild(cancel);
+        
+        function showDeleteToast() {
+            const toast = document.getElementById('deleteToast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 1000);
+        }
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallBanner();
+        });
+        
+        function showInstallBanner() {
+            const banner = document.getElementById('installBanner');
+            const dismissed = localStorage.getItem('installDismissed');
+            if (!dismissed) {
+                banner.classList.add('show');
+            }
+        }
+        
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            const banner = document.getElementById('installBanner');
+            banner.classList.remove('show');
+            
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('用户接受了安装');
                 }
-                const confirm = document.createElement('button');
-                confirm.className = 'dialog-btn-confirm' + (opts.danger ? ' danger' : '');
-                confirm.textContent = opts.confirmText || '确认';
-                confirm.onclick = () => { overlay.classList.remove('active'); resolve(true); };
-                actions.appendChild(confirm);
-                overlay.classList.add('active');
-                setTimeout(() => confirm.focus(), 100);
-            });
-        }
-
-        function showAlert(opts) {
-            return new Promise((resolve) => {
-                const overlay = document.getElementById('dialogOverlay');
-                document.getElementById('dialogIcon').textContent = opts.icon || '✅';
-                document.getElementById('dialogTitle').textContent = opts.title || '';
-                document.getElementById('dialogBody').innerHTML = opts.message || '';
-                const actions = document.getElementById('dialogActions');
-                actions.innerHTML = '';
-                const ok = document.createElement('button');
-                ok.className = 'dialog-btn-confirm';
-                ok.textContent = '知道了';
-                ok.onclick = () => { overlay.classList.remove('active'); resolve(); };
-                actions.appendChild(ok);
-                overlay.classList.add('active');
-                setTimeout(() => ok.focus(), 100);
-            });
-        }
-
-        // ==================== Status ====================
-        function showStatus(type, title, desc, btnText) {
-            const el = document.getElementById('statusState');
-            document.getElementById('statusIcon').textContent = type === 'empty' ? '📭' : type === 'error' ? '😵' : '';
-            document.getElementById('statusTitle').textContent = title || '';
-            document.getElementById('statusDesc').textContent = desc || '';
-            const btn = document.getElementById('statusBtn');
-            if (btnText) {
-                btn.textContent = btnText;
-                btn.style.display = '';
-            } else {
-                btn.style.display = 'none';
+                deferredPrompt = null;
             }
-            el.classList.add('visible');
-        }
-
-        function hideStatus() {
-            document.getElementById('statusState').classList.remove('visible');
-        }
-
-        // ==================== Skeleton ====================
-        function generateSkeleton() {
-            const grid = document.getElementById('skeletonGrid');
-            const count = 32;
-            grid.innerHTML = '';
-            for (let i = 0; i < count; i++) {
-                const item = document.createElement('div');
-                item.className = 'skeleton-item';
-                grid.appendChild(item);
-            }
-        }
-
-        function showSkeleton() {
-            document.getElementById('skeletonArea').style.display = '';
-            hideStatus();
-        }
-
-        function hideSkeleton() {
-            document.getElementById('skeletonArea').style.display = 'none';
-        }
-
-        // ==================== Loading ====================
+        });
+        
+        document.getElementById('installClose').addEventListener('click', () => {
+            document.getElementById('installBanner').classList.remove('show');
+            localStorage.setItem('installDismissed', 'true');
+        });
+        
         async function load() {
-            showSkeleton();
-            document.getElementById('mainContainer').style.display = 'block';
             try {
-                const res = await fetch('/api/dates?t=' + Date.now());
+                const res = await fetch('/api/dates');
                 const data = await res.json();
-                if (!data.dates || data.dates.length === 0) {
-                    hideSkeleton();
-                    showStatus('empty', '还没有照片或视频', '把文件放到媒体文件夹后刷新页面即可', '');
-                    return;
-                }
-                // Parallel loading of all dates
-                const promises = data.dates.map(async (date) => {
-                    const files = [];
+                for (let i = 0; i < data.dates.length; i++) {
+                    const date = data.dates[i];
                     let p = 1, hasMore = true;
                     while (hasMore) {
                         const r = await fetch('/api/files/' + date + '?page=' + p);
                         const d = await r.json();
-                        d.files.forEach(f => files.push({ ...f, date }));
+                        d.files.forEach(f => allMedia.push({...f, date}));
                         hasMore = p < d.pages;
                         p++;
                     }
-                    return files;
-                });
-                const nested = await Promise.all(promises);
-                state.allMedia = nested.flat();
-                filterMedia();
-                hideSkeleton();
-                if (state.filteredMedia.length === 0) {
-                    showStatus('empty', '没有匹配的内容', '试试切换筛选条件', '');
-                } else {
-                    render();
                 }
+                filterMedia();
+                render();
             } catch (e) {
                 console.error('Load error:', e);
-                hideSkeleton();
-                showStatus('error', '加载失败', '无法连接服务器，请检查网络后重试', '重新加载');
-                document.getElementById('statusBtn').onclick = load;
+            } finally {
+                document.getElementById('mainContainer').style.display = 'block';
             }
         }
-
-        // ==================== Filter ====================
+        
         function filterMedia() {
-            const f = state.currentFilter;
-            if (f === 'all') state.filteredMedia = state.allMedia;
-            else if (f === 'photo') state.filteredMedia = state.allMedia.filter(m => !m.isVideo);
-            else state.filteredMedia = state.allMedia.filter(m => m.isVideo);
-            if (state.selectMode) {
-                state.selectedFiles.clear();
-                updateActionButtons();
-            }
+            if (currentFilter === 'all') filteredMedia = allMedia;
+            else if (currentFilter === 'photo') filteredMedia = allMedia.filter(m => !m.isVideo);
+            else filteredMedia = allMedia.filter(m => m.isVideo);
         }
-
-        // ==================== Render with Event Delegation ====================
+        
         function render() {
             let html = '', currentDate = '';
-            state.filteredMedia.forEach((item, i) => {
+            filteredMedia.forEach((item, i) => {
                 if (item.date !== currentDate) {
                     if (currentDate) html += '</div></div>';
                     currentDate = item.date;
                     let dateHtml = '<div class="date-section"><div class="date-header">' + currentDate;
-                    if (state.selectMode) {
-                        dateHtml += '<span class="select-hint">点击选择 | 已选 ' + state.selectedFiles.size + ' 个</span>';
+                    if (selectMode) {
+                        dateHtml += '<span class="select-hint">点击选择 | 已选 ' + selectedFiles.size + ' 个</span>';
                     }
                     dateHtml += '</div><div class="photo-grid">';
                     html += dateHtml;
                 }
+                const thumbUrl = safePath(item.path);
                 const encodedPath = encodeURIComponent(item.path);
-                const sel = state.selectedFiles.has(item.path) ? ' selected' : '';
+                const isSelected = selectedFiles.has(item.path);
+                const selectedClass = isSelected ? ' selected' : '';
                 if (item.isVideo) {
-                    html += '<div class="photo-item' + sel + '" data-index="' + i + '" data-path="' + encodedPath + '">';
-                    html += '<img src="/thumb/' + encodedPath + '" loading="lazy" alt="">';
-                    html += '<div class="video-overlay"><div class="play-indicator"></div></div></div>';
+                    html += '<div class="photo-item' + selectedClass + '" data-index="' + i + '" data-path="' + encodeURIComponent(item.path) + '">';
+                    html += '<img src="/thumb/' + thumbUrl + '" loading="lazy">';
+                    html += '<div class="video-overlay"><div class="play-indicator"></div></div>';
+                    html += '</div>';
                 } else {
-                    html += '<div class="photo-item' + sel + '" data-index="' + i + '" data-path="' + encodedPath + '"><img src="/thumb/' + encodedPath + '" loading="lazy" alt=""></div>';
+                    html += '<div class="photo-item' + selectedClass + '" data-index="' + i + '" data-path="' + encodeURIComponent(item.path) + '"><img src="/thumb/' + thumbUrl + '" loading="lazy"></div>';
                 }
             });
             if (currentDate) html += '</div></div>';
             document.getElementById('content').innerHTML = html;
-            document.querySelectorAll('#content img').forEach(function(i) { var s = i.src.split('?')[0]; i.src = s + '?t=' + state.cacheBust; });
+            
+            document.querySelectorAll('.photo-item').forEach(el => {
+                let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+                let touchMoved = false;
+                let lastTapTime = 0;
+                
+                // 触摸开始
+                el.addEventListener('touchstart', (e) => {
+                    if (e.touches.length !== 1) return;
+                    const touch = e.touches[0];
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                    touchStartTime = Date.now();
+                    touchMoved = false;
+                });
+                
+                // 触摸移动（检测是否在滑动）
+                el.addEventListener('touchmove', (e) => {
+                    if (e.touches.length !== 1) return;
+                    const touch = e.touches[0];
+                    const deltaX = Math.abs(touch.clientX - touchStartX);
+                    const deltaY = Math.abs(touch.clientY - touchStartY);
+                    if (deltaX > 8 || deltaY > 8) {
+                        touchMoved = true;
+                    }
+                });
+                
+                // 触摸结束（区分点击和滑动）
+                el.addEventListener('touchend', (e) => {
+                    if (touchMoved) return; // 滑动了，忽略
+                    
+                    const touch = e.changedTouches[0];
+                    const deltaX = Math.abs(touch.clientX - touchStartX);
+                    const deltaY = Math.abs(touch.clientY - touchStartY);
+                    const deltaTime = Date.now() - touchStartTime;
+                    
+                    // 移动距离小（<8px）且时间短（<250ms）才算点击
+                    if (deltaX < 8 && deltaY < 8 && deltaTime < 250) {
+                        e.preventDefault();
+                        lastTapTime = Date.now();
+                        handleTap();
+                    }
+                });
+                
+                // 点击处理函数
+                const handleTap = () => {
+                    if (selectMode) {
+                        const path = decodeURIComponent(el.dataset.path);
+                        if (selectedFiles.has(path)) {
+                            selectedFiles.delete(path);
+                            el.classList.remove('selected');
+                        } else {
+                            selectedFiles.add(path);
+                            el.classList.add('selected');
+                        }
+                        updateActionButtons();
+                    } else {
+                        currentIndex = parseInt(el.dataset.index);
+                        openLightbox();
+                    }
+                };
+                
+                // 桌面端鼠标点击（防止移动端双触发）
+                el.addEventListener('click', (e) => {
+                    // 如果300ms内刚有过触摸点击，忽略这个合成click事件
+                    if (Date.now() - lastTapTime < 300) return;
+                    handleTap();
+                });
+            });
+        }
+        
+        function toggleSelectMode() {
+            selectMode = !selectMode;
+            if (!selectMode) {
+                selectedFiles.clear();
+            }
+            updateActionButtons();
+            render();
+        }
+        
+        function updateActionButtons() {
+            const selectModeBtn = document.getElementById('selectModeBtn');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const deleteBtn = document.getElementById('deleteBtn');
+            
+            if (selectMode) {
+                selectModeBtn.classList.add('active');
+                selectModeBtn.textContent = '取消';
+                selectAllBtn.style.display = 'block';
+                
+                if (selectedFiles.size > 0) {
+                    deleteBtn.style.display = 'block';
+                    deleteBtn.textContent = '🗑️ 删除 (' + selectedFiles.size + ')';
+                    deleteBtn.style.opacity = '1';
+                } else {
+                    deleteBtn.style.display = 'block';
+                    deleteBtn.textContent = '🗑️ 删除';
+                    deleteBtn.style.opacity = '0.5';
+                }
+            } else {
+                selectModeBtn.classList.remove('active');
+                selectModeBtn.textContent = '选择';
+                selectAllBtn.style.display = 'none';
+                deleteBtn.style.display = 'none';
+                deleteBtn.style.opacity = '1';
+            }
+        }
+        
+        function selectAll() {
+            if (selectedFiles.size === filteredMedia.length) {
+                selectedFiles.clear();
+            } else {
+                selectedFiles.clear();
+                filteredMedia.forEach(item => selectedFiles.add(item.path));
+            }
+            render();
             updateActionButtons();
         }
-
-        // ==================== Event Delegation ====================
-        document.getElementById('content').addEventListener('click', (e) => {
-            const item = e.target.closest('.photo-item');
-            if (!item) return;
-            const index = parseInt(item.dataset.index);
-            if (state.selectMode) {
-                const path = decodeURIComponent(item.dataset.path);
-                if (state.selectedFiles.has(path)) {
-                    state.selectedFiles.delete(path);
-                    item.classList.remove('selected');
-                } else {
-                    state.selectedFiles.add(path);
-                    item.classList.add('selected');
-                }
-                updateActionButtons();
-                // Update select-hint counters
-                document.querySelectorAll('.select-hint').forEach(el => {
-                    el.textContent = '点击选择 | 已选 ' + state.selectedFiles.size + ' 个';
-                });
-            } else {
-                state.currentIndex = index;
-                openLightbox();
-            }
-        });
-
-        // ==================== Select Mode ====================
-        function toggleSelectMode() {
-            state.selectMode = !state.selectMode;
-            if (!state.selectMode) state.selectedFiles.clear();
-            render();
-        }
-
-        function updateActionButtons() {
-            const sm = document.getElementById('selectModeBtn');
-            const sa = document.getElementById('selectAllBtn');
-            const db = document.getElementById('deleteBtn');
-            if (state.selectMode) {
-                sm.textContent = '取消';
-                sm.classList.add('active');
-                sa.style.display = '';
-                db.style.display = '';
-                db.textContent = state.selectedFiles.size > 0 ? '🗑️ 删除 (' + state.selectedFiles.size + ')' : '🗑️ 删除';
-                db.style.opacity = state.selectedFiles.size > 0 ? '1' : '0.5';
-            } else {
-                sm.textContent = '选择';
-                sm.classList.remove('active');
-                sa.style.display = 'none';
-                db.style.display = 'none';
-            }
-        }
-
-        function selectAll() {
-            if (state.selectedFiles.size === state.filteredMedia.length) {
-                state.selectedFiles.clear();
-            } else {
-                state.selectedFiles.clear();
-                state.filteredMedia.forEach(item => state.selectedFiles.add(item.path));
-            }
-            render();
-        }
-
+        
         async function deleteSelected() {
-            if (state.selectedFiles.size === 0) return;
-            const ok = await showConfirm({
-                title: '确认删除',
-                message: '确定要删除选中的 ' + state.selectedFiles.size + ' 个文件吗？',
-                confirmText: '删除',
-                danger: true,
-                icon: '⚠️'
-            });
-            if (!ok) return;
+            if (selectedFiles.size === 0) return;
+            
+            const confirmed = confirm('确定要删除选中的 ' + selectedFiles.size + ' 个文件吗？此操作不可恢复！');
+            if (!confirmed) return;
+            
             try {
-                const filesToDelete = Array.from(state.selectedFiles);
+                const filesToDelete = Array.from(selectedFiles);
+                console.log('准备删除的文件：', filesToDelete);
+                
                 const response = await fetch('/api/delete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ files: filesToDelete })
                 });
+                
                 const data = await response.json();
+                console.log('删除结果：', data);
+                
                 if (data.deleted > 0) {
-                    showToast('成功删除 ' + data.deleted + ' 个文件', 'success');
+                    showDeleteToast();
                 } else if (data.failed > 0) {
-                    showToast(data.failed + ' 个文件删除失败', 'error');
+                    alert('删除失败！' + data.failed + ' 个文件未能删除。');
                 } else {
-                    showToast('没有文件被删除', 'error');
+                    alert('没有文件被删除。请刷新页面重试。');
                 }
-                state.allMedia = [];
-                state.selectedFiles.clear();
-                state.selectMode = false;
+                
+                allMedia = [];
+                selectedFiles.clear();
+                selectMode = false;
+                updateActionButtons();
                 await load();
             } catch (e) {
                 console.error('Delete error:', e);
-                showToast('删除失败: ' + e.message, 'error');
+                alert('删除失败！请重试。错误信息：' + e.message);
             }
         }
-
-        // ==================== Lightbox ====================
+        
         function openLightbox() {
-            const item = state.filteredMedia[state.currentIndex];
-            const encodedPath = encodeURIComponent(item.path);
-            const container = document.getElementById('lightboxContent');
-            // 先停掉所有视频再清空
-            container.querySelectorAll('video').forEach(v => { v.pause(); v.src = ''; v.load(); });
-            container.innerHTML = '';
-            document.getElementById('lightboxCounter').textContent = (state.currentIndex + 1) + ' / ' + state.filteredMedia.length;
+            const item = filteredMedia[currentIndex];
+            const thumbUrl = safePath(item.path);
+            
+            document.getElementById('lightboxContent').innerHTML = '';
+            document.getElementById('lightboxCounter').textContent = (currentIndex + 1) + ' / ' + filteredMedia.length;
             document.getElementById('lightbox').classList.add('active');
             document.body.style.overflow = 'hidden';
-            state.currentScale = 1;
-            state.translateX = 0;
-            state.translateY = 0;
-            state.isZoomed = false;
-
+            currentScale = 1;
+            
             if (item.isVideo) {
                 const video = document.createElement('video');
                 video.controls = true;
@@ -636,351 +542,237 @@
                 video.muted = true;
                 video.playsInline = true;
                 video.preload = 'auto';
-                video.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000;';
-                video.innerHTML = '<source src="/api/file/' + encodedPath + '" >';
+                video.style.background = '#000';
+                const source = document.createElement('source');
+                source.src = '/api/file/' + thumbUrl;
+                source.type = 'video/mp4';
+                video.appendChild(source);
+                video.onloadeddata = () => {
+                    video.muted = false;
+                    video.play();
+                };
                 video.onerror = () => {
-                    container.innerHTML = '<div class="video-error">无法播放此视频<br><button onclick="navigate(1)">下一个</button></div>';
+                    document.getElementById('lightboxContent').innerHTML = '<div class="video-error">无法播放此视频<br><button onclick="navigate(1)">下一个</button></div>';
                 };
-                container.appendChild(video);
-                video.onloadeddata = () => { video.muted = false; video.play().catch(() => {}); };
+                document.getElementById('lightboxContent').appendChild(video);
             } else {
-                const wrapper = document.createElement('div');
-                wrapper.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;';
+                const imgContainer = document.createElement('div');
+                imgContainer.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden;';
+                
                 const img = document.createElement('img');
-                img.src = '/api/file/' + encodedPath;
-                img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in;transition:transform 0.2s ease;user-select:none;-webkit-user-select:none;will-change:transform;';
-                img.draggable = false;
+                img.src = '/api/file/' + thumbUrl;
+                img.style.cssText = 'max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.2s ease;';
+                
                 img.onerror = () => {
-                    wrapper.innerHTML = '<div class="video-error" style="color:#fff;">无法加载此图片<br><small>文件可能已损坏或过大</small><br><button onclick="navigate(1)">下一个</button></div>';
+                    imgContainer.innerHTML = '<div class="video-error" style="color:#fff;">无法加载此图片<br><small>文件可能已损坏或过大</small><br><button onclick="navigate(1)">下一个</button></div>';
                 };
-
-                // ========== Click/Double-click to zoom ==========
-                let lastClickTime = 0;
+                
+                imgContainer.appendChild(img);
+                document.getElementById('lightboxContent').appendChild(imgContainer);
+                
+                imgContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+                imgContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+                imgContainer.addEventListener('touchend', handleTouchEnd);
+                
                 img.addEventListener('click', (e) => {
-                    const now = Date.now();
-                    if (now - lastClickTime < 350) { return; } // ignore if double-click coming
-                    lastClickTime = now;
-                    if (state.isZoomed) {
-                        state.currentScale = 1;
-                        state.translateX = 0;
-                        state.translateY = 0;
-                        state.isZoomed = false;
-                        applyTransform(img);
-                        img.style.cursor = 'zoom-in';
+                    if (e.touches && e.touches.length > 1) return;
+                    
+                    if (currentScale === 1) {
+                        currentScale = 2;
+                        img.style.transform = 'scale(' + currentScale + ')';
+                        img.classList.add('zoomed');
                     } else {
-                        state.currentScale = 2.5;
-                        state.translateX = 0;
-                        state.translateY = 0;
-                        state.isZoomed = true;
-                        applyTransform(img);
-                        img.style.cursor = 'grab';
+                        currentScale = 1;
+                        img.style.transform = 'scale(' + currentScale + ')';
+                        img.classList.remove('zoomed');
                     }
                 });
-
-                // Double-click to reset
-                img.addEventListener('dblclick', (e) => {
-                    e.preventDefault();
-                    removePanHandlers();
-                    state.currentScale = 1;
-                    state.translateX = 0;
-                    state.translateY = 0;
-                    state.isZoomed = false;
-                    applyTransform(img);
-                    img.style.cursor = 'zoom-in';
-                });
-
-                // ========== Pinch Zoom ==========
-                let pinchDistance = 0;
-
-                // ========== Pan / Drag ==========
-                let dragStartX = 0, dragStartY = 0;
-                let dragStartTX = 0, dragStartTY = 0;
-                let isDragging = false;
-                let pointerId = null;
-
-                function onPointerDown(e) {
-                    if (e.target !== img && !img.contains(e.target)) return;
-                    if (e.pointerType === 'touch' && state.pinchInProgress) return;
-                    if (!state.isZoomed && e.pointerType !== 'touch') {
-                        // Desktop click when not zoomed: handled by click event
-                        return;
-                    }
-                    e.preventDefault();
-                    img.style.transition = 'none';
-                    img.setPointerCapture(e.pointerId);
-                    pointerId = e.pointerId;
-                    dragStartX = e.clientX;
-                    dragStartY = e.clientY;
-                    dragStartTX = state.translateX;
-                    dragStartTY = state.translateY;
-                    isDragging = state.isZoomed;
-                    if (isDragging) img.style.cursor = 'grabbing';
-                }
-
-                function onPointerMove(e) {
-                    if (!isDragging || e.pointerId !== pointerId) return;
-                    e.preventDefault();
-                    state.translateX = dragStartTX + (e.clientX - dragStartX);
-                    state.translateY = dragStartTY + (e.clientY - dragStartY);
-                    applyTransform(img);
-                }
-
-                function onPointerUp(e) {
-                    if (e.pointerId !== pointerId) return;
-                    img.releasePointerCapture(e.pointerId);
-                    pointerId = null;
-                    if (isDragging && state.isZoomed) {
-                        img.style.cursor = 'grab';
-                    }
-                    isDragging = false;
-                    img.style.transition = 'transform 0.2s ease';
-                }
-
-                // Only enable pan when zoomed - use different handling
-                img.addEventListener('pointerdown', onPointerDown);
-                img.addEventListener('pointermove', onPointerMove);
-                img.addEventListener('pointerup', onPointerUp);
-                img.addEventListener('pointercancel', onPointerUp);
-
-                // ========== Pinch (touch only) ==========
-                let pinchStartScale = 1;
-                let pinchStartTranslateX = 0;
-                let pinchStartTranslateY = 0;
-                state.pinchInProgress = false;
-
-                wrapper.addEventListener('touchstart', (e) => {
-                    if (e.touches.length === 2) {
-                        e.preventDefault();
-                        state.pinchInProgress = true;
-                        const t1 = e.touches[0], t2 = e.touches[1];
-                        pinchDistance = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-                        pinchStartScale = state.currentScale;
-                        pinchStartTranslateX = state.translateX;
-                        pinchStartTranslateY = state.translateY;
-                    }
-                }, { passive: false });
-
-                wrapper.addEventListener('touchmove', (e) => {
-                    if (e.touches.length === 2 && state.pinchInProgress) {
-                        e.preventDefault();
-                        const t1 = e.touches[0], t2 = e.touches[1];
-                        const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-                        const ratio = dist / pinchDistance;
-                        state.currentScale = Math.max(0.5, Math.min(pinchStartScale * ratio, 6));
-                        // Center the zoom on the pinch midpoint
-                        const cx = (t1.clientX + t2.clientX) / 2;
-                        const cy = (t1.clientY + t2.clientY) / 2;
-                        state.isZoomed = state.currentScale > 1;
-                        applyTransform(img);
-                        if (state.isZoomed) {
-                            img.style.cursor = 'grab';
-                        } else {
-                            img.style.cursor = 'zoom-in';
-                        }
-                    }
-                }, { passive: false });
-
-                wrapper.addEventListener('touchend', (e) => {
-                    if (e.touches.length < 2 && state.pinchInProgress) {
-                        state.pinchInProgress = false;
-                        if (state.currentScale < 1) {
-                            state.currentScale = 1;
-                            state.translateX = 0;
-                            state.translateY = 0;
-                            state.isZoomed = false;
-                            applyTransform(img);
-                            img.style.cursor = 'zoom-in';
-                        }
-                    }
-                }, { passive: true });
-
-                wrapper.appendChild(img);
-                container.appendChild(wrapper);
             }
         }
-
-        function applyTransform(el) {
-            el.style.transform = 'translate(' + state.translateX + 'px, ' + state.translateY + 'px) scale(' + state.currentScale + ')';
+        
+        function handleTouchStart(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                initialPinchScale = currentScale;
+                const currentDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+                window._pinchDistance = currentDistance;
+            }
         }
-
-        function closeLightbox() {
-            if (window._removePan) window._removePan();
-            const video = document.querySelector('#lightboxContent video');
-            if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
-            document.getElementById('lightbox').classList.remove('active');
+        
+        function handleTouchMove(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const currentDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+                
+                if (window._pinchDistance) {
+                    const scale = (currentDistance / window._pinchDistance) * initialPinchScale;
+                    currentScale = Math.max(0.5, Math.min(scale, 5));
+                    
+                    const img = document.querySelector('.lightbox-content img');
+                    if (img) {
+                        img.style.transform = 'scale(' + currentScale + ')';
+                        img.classList.toggle('zoomed', currentScale > 1);
+                    }
+                }
+            }
+        }
+        
+        function handleTouchEnd() {
+            window._pinchDistance = null;
+            if (currentScale < 1) {
+                currentScale = 1;
+                const img = document.querySelector('.lightbox-content img');
+                if (img) {
+                    img.style.transform = 'scale(' + currentScale + ')';
+                    img.classList.remove('zoomed');
+                }
+            }
+        }
+        
+        function closeLightbox() { 
+            const video = document.querySelector('.lightbox-content video');
+            if (video) video.pause();
+            document.getElementById('lightbox').classList.remove('active'); 
             document.body.style.overflow = '';
         }
-
-        function navigate(delta) {
-            const video = document.querySelector('#lightboxContent video');
-            if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
-            state.currentIndex = (state.currentIndex + delta + state.filteredMedia.length) % state.filteredMedia.length;
-            openLightbox();
+        
+        function navigate(delta) { 
+            const video = document.querySelector('.lightbox-content video');
+            if (video) video.pause();
+            currentIndex = (currentIndex + delta + filteredMedia.length) % filteredMedia.length; 
+            openLightbox(); 
         }
-
-        // ==================== Lightbox Event Delegation ====================
+        
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                filterMedia();
+                currentIndex = 0;
+                if (selectMode) {
+                    selectedFiles.clear();
+                }
+                render();
+            });
+        });
+        
+        document.getElementById('selectModeBtn').addEventListener('click', toggleSelectMode);
+        document.getElementById('selectAllBtn').addEventListener('click', selectAll);
+        document.getElementById('deleteBtn').addEventListener('click', deleteSelected);
+        
         document.getElementById('lightboxCloseBtn').addEventListener('click', closeLightbox);
         document.getElementById('navPrev').addEventListener('click', () => navigate(-1));
         document.getElementById('navNext').addEventListener('click', () => navigate(1));
-
+        
+        // 大图查看页删除按钮
         document.getElementById('lightboxDeleteBtn').addEventListener('click', async () => {
-            const currentItem = state.filteredMedia[state.currentIndex];
+            const currentItem = filteredMedia[currentIndex];
             if (!currentItem) return;
-            const ok = await showConfirm({
-                title: '确认删除',
-                message: '确定要删除这张图片吗？',
-                path: currentItem.path,
-                confirmText: '删除',
-                danger: true,
-                icon: '⚠️'
-            });
-            if (!ok) return;
+            
+            const confirmed = confirm('确定要删除这张图片吗？\n\n' + currentItem.path + '\n\n此操作不可恢复！');
+            if (!confirmed) return;
+            
             try {
                 const response = await fetch('/api/delete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ files: [currentItem.path] })
                 });
+                
                 const data = await response.json();
+                
                 if (data.deleted > 0) {
-                    showToast('删除成功', 'success');
-                    const idx = state.allMedia.findIndex(m => m.path === currentItem.path);
-                    if (idx > -1) state.allMedia.splice(idx, 1);
+                    showDeleteToast();
+                    
+                    // 从列表中移除
+                    const idxToRemove = allMedia.findIndex(m => m.path === currentItem.path);
+                    if (idxToRemove > -1) {
+                        allMedia.splice(idxToRemove, 1);
+                    }
+                    
+                    // 重新过滤
                     filterMedia();
+                    
+                    // 关闭查看器
                     closeLightbox();
-                    if (state.filteredMedia.length > 0) {
-                        state.currentIndex = Math.min(state.currentIndex, state.filteredMedia.length - 1);
+                    
+                    // 如果还有图片，显示下一张
+                    if (filteredMedia.length > 0) {
+                        currentIndex = Math.min(currentIndex, filteredMedia.length - 1);
                         openLightbox();
                     } else {
-                        // After deletion, we need to re-check all dates
-                        // Instead of re-calling load() which may miss the delete on server side
-                        // just re-render with empty state
-                        if (state.allMedia.length === 0) {
-                            render();
-                            showStatus('empty', '没有照片或视频了', '把所有文件都删光了', '');
-                        } else {
-                            render();
-                        }
+                        // 没有图片了，刷新页面
+                        await load();
                     }
                 } else {
-                    showAlert({ title: '删除失败', message: '请重试', icon: '❌' });
+                    alert('❌ 删除失败！请重试。');
                 }
             } catch (e) {
                 console.error('Delete error:', e);
-                showAlert({ title: '删除失败', message: e.message, icon: '❌' });
+                alert('❌ 删除失败！请重试。');
             }
         });
-
-        // Click background to close
+        
         document.getElementById('lightbox').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('lightbox')) closeLightbox();
+            if (e.target.id === 'lightbox') {
+                closeLightbox();
+            }
         });
-
-        // ==================== Keyboard ====================
-        document.addEventListener('keydown', (e) => {
-            if (!document.getElementById('lightbox').classList.contains('active')) return;
-            if (e.key === 'Escape') closeLightbox();
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
-            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+        
+        document.getElementById('lightboxContent').addEventListener('click', closeLightbox);
+        
+        document.addEventListener('keydown', (e) => { 
+            if (!document.getElementById('lightbox').classList.contains('active')) return; 
+            if (e.key === 'Escape') closeLightbox(); 
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1); 
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1); 
         });
-
-        // Mouse wheel in lightbox
-        window.addEventListener('wheel', (e) => {
-            if (!document.getElementById('lightbox').classList.contains('active')) return;
-            e.preventDefault();
-            navigate(e.deltaY > 0 ? 1 : -1);
+        
+        window.addEventListener('wheel', (e) => { 
+            if (!document.getElementById('lightbox').classList.contains('active')) return; 
+            e.preventDefault(); 
+            navigate(e.deltaY > 0 ? 1 : -1); 
         }, { passive: false });
-
-        // Swipe for lightbox
-        let lbTouchStartX = 0, lbTouchStartY = 0, lbTouchTime = 0, lbIgnoreSwipe = false;
+        
         document.addEventListener('touchstart', (e) => {
-            if (!document.getElementById('lightbox').classList.contains('active')) return;
-            lbTouchStartX = e.touches[0].clientX;
-            lbTouchStartY = e.touches[0].clientY;
-            lbTouchTime = Date.now();
-            const ww = window.innerWidth;
-            lbIgnoreSwipe = lbTouchStartX < 70 || lbTouchStartX > ww - 70;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchStartTime = Date.now();
+            const windowWidth = window.innerWidth;
+            ignoreSwipe = touchStartX < EDGE_THRESHOLD || touchStartX > windowWidth - EDGE_THRESHOLD;
         }, { passive: true });
-
+        
         document.addEventListener('touchend', (e) => {
             if (!document.getElementById('lightbox').classList.contains('active')) return;
-            if (lbIgnoreSwipe) return;
-            const endX = e.changedTouches[0].clientX;
-            const endY = e.changedTouches[0].clientY;
-            const dt = Date.now() - lbTouchTime;
-            const dx = lbTouchStartX - endX;
-            const dy = lbTouchStartY - endY;
-            if (dt > 350) return;
-            if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy)) {
-                navigate(dx > 0 ? 1 : -1);
-            } else if (Math.abs(dy) > 80) {
-                navigate(dy > 0 ? 1 : -1);
+            if (ignoreSwipe) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const deltaTime = Date.now() - touchStartTime;
+            const deltaX = touchStartX - touchEndX;
+            const deltaY = touchStartY - touchEndY;
+            
+            if (deltaTime > TIME_THRESHOLD) return;
+            
+            if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
+                navigate(deltaX > 0 ? 1 : -1);
+            } else if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+                navigate(deltaY > 0 ? 1 : -1);
             }
         }, { passive: false });
-
-        // ==================== Filter Buttons ====================
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                state.currentFilter = btn.dataset.filter;
-                filterMedia();
-                state.currentIndex = 0;
-                if (state.filteredMedia.length > 0) {
-                    hideStatus();
-                    render();
-                } else {
-                    document.getElementById('content').innerHTML = '';
-                    showStatus('empty', '没有匹配的内容', '试试切换筛选条件', '');
-                }
-                updateActionButtons();
-            });
-        });
-
-        // ==================== Buttons ====================
-        document.getElementById('selectModeBtn').addEventListener('click', toggleSelectMode);
-        document.getElementById('refreshBtn').addEventListener('click', refreshFiles);
-        document.getElementById('selectAllBtn').addEventListener('click', selectAll);
-        document.getElementById('deleteBtn').addEventListener('click', deleteSelected);
-
-        // ==================== PWA Install ====================
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const banner = document.getElementById('installBanner');
-            if (!localStorage.getItem('installDismissed')) {
-                banner.classList.add('show');
-            }
-        });
-
-        document.getElementById('installBtn').addEventListener('click', async () => {
-            document.getElementById('installBanner').classList.remove('show');
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') console.log('用户接受了安装');
-                deferredPrompt = null;
-            }
-        });
-
-        document.getElementById('installClose').addEventListener('click', () => {
-            document.getElementById('installBanner').classList.remove('show');
-            localStorage.setItem('installDismissed', 'true');
-        });
-
-        async function refreshFiles() {
-            state.cacheBust = Date.now();
-            state.allMedia = [];
-            showSkeleton();
-            hideStatus();
-            try { await fetch('/api/refresh'); } catch(e) {}
-            try { await load(); } catch(e) { console.error('Refresh failed', e); }
-        }
-
-        // ==================== Init ====================
-        generateSkeleton();
+        
         load();
-
     </script>
 </body>
 </html>

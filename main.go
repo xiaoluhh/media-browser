@@ -1,4 +1,4 @@
-﻿
+
 package main
 
 import (
@@ -45,7 +45,7 @@ var (
 	lastScan     time.Time
 	scanInterval = time.Hour
 	videoExts    = map[string]bool{".mp4": true, ".avi": true, ".mov": true, ".mkv": true, ".webm": true}
-	imageExts    = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true, ".jpeg.jpg": true, ".bmp": true, ".svg": true, ".avif": true, ".ico": true, ".tiff": true, ".tif": true, ".heic": true, ".heif": true}
+	imageExts    = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true, ".jpeg.jpg": true}
 	thumbSize    = 400
 	ffmpegPath   string
 )
@@ -150,7 +150,6 @@ func main() {
 	http.HandleFunc("/api/files/", filesHandler)
 	http.HandleFunc("/api/file/", fileHandler)
 	http.HandleFunc("/api/delete", deleteHandler)
-	http.HandleFunc("/api/refresh", refreshHandler)
 	http.HandleFunc("/thumb/", thumbHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
@@ -244,8 +243,14 @@ func filesHandler(w http.ResponseWriter, r *http.Request) {
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/api/file/")
-	path = filepath.Base(path)
-	fullPath := filepath.Join(mediaDir, path)
+	fullPath := filepath.Join(mediaDir, filepath.FromSlash(path))
+
+	absMedia, _ := filepath.Abs(mediaDir)
+	absFull, _ := filepath.Abs(fullPath)
+	if !strings.HasPrefix(absFull, absMedia) {
+		http.NotFound(w, r)
+		return
+	}
 
 	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 		http.NotFound(w, r)
@@ -282,22 +287,20 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	failed := 0
 
 	for _, fileName := range req.Files {
-		filePath := filepath.Join(mediaDir, filepath.Base(fileName))
-		thumbPath := filepath.Join(thumbsDir, filepath.Base(fileName)+".thumb.jpg")
+		filePath := filepath.Join(mediaDir, filepath.FromSlash(fileName))
+		safeName := strings.ReplaceAll(fileName, "/", "_")
+		thumbPath := filepath.Join(thumbsDir, safeName+".thumb.jpg")
+
+		absMedia, _ := filepath.Abs(mediaDir)
+		absFull, _ := filepath.Abs(filePath)
+		if !strings.HasPrefix(absFull, absMedia) {
+			continue
+		}
 
 		if _, err := os.Stat(filePath); err == nil {
 			if err := os.Remove(filePath); err == nil {
 				deleted++
 				os.Remove(thumbPath)
-				// 同时从内存索引中移除
-				indexMutex.Lock()
-				for i, f := range mediaIndex {
-					if f.Path == fileName {
-						mediaIndex = append(mediaIndex[:i], mediaIndex[i+1:]...)
-						break
-					}
-				}
-				indexMutex.Unlock()
 			} else {
 				failed++
 				log.Printf("Failed to delete %s: %v", filePath, err)
@@ -315,24 +318,19 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func refreshHandler(w http.ResponseWriter, r *http.Request) {
-	go func() {
-		scanFiles()
-		go generateAllThumbnails()
-	}()
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"status": "ok",
-		"total":  len(mediaIndex),
-	})
-}
-
 func thumbHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "max-age=86400")
 	path := strings.TrimPrefix(r.URL.Path, "/thumb/")
-	path = filepath.Base(path)
-	thumbPath := filepath.Join(thumbsDir, path+".thumb.jpg")
-	fullPath := filepath.Join(mediaDir, path)
+	safeName := strings.ReplaceAll(path, "/", "_")
+	thumbPath := filepath.Join(thumbsDir, safeName+".thumb.jpg")
+	fullPath := filepath.Join(mediaDir, filepath.FromSlash(path))
+
+	absMedia, _ := filepath.Abs(mediaDir)
+	absFull, _ := filepath.Abs(fullPath)
+	if !strings.HasPrefix(absFull, absMedia) {
+		http.NotFound(w, r)
+		return
+	}
 
 	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 		http.NotFound(w, r)
@@ -380,10 +378,10 @@ func thumbHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func generateImageThumbnail(imagePath string) image.Image {
-	// 使用 ffmpeg 生成图片缩略图，支持所有格式（包括 WebP）
 	cmd := exec.Command(ffmpegPath,
 		"-i", imagePath,
 		"-vframes", "1",
+		"-vf", fmt.Sprintf("scale='if(gt(iw,ih),%d,-2)':'if(gt(iw,ih),-2,%d)':flags=lanczos", thumbSize, thumbSize),
 		"-q:v", "2",
 		"-f", "image2pipe",
 		"-")
@@ -395,11 +393,10 @@ func generateImageThumbnail(imagePath string) image.Image {
 	if err := cmd.Run(); err == nil {
 		img, _, err := image.Decode(&out)
 		if err == nil {
-			return resizeImage(img, thumbSize)
+			return img
 		}
 	}
 
-	// 如果 ffmpeg 失败，尝试 Go 原生解码
 	file, err := os.Open(imagePath)
 	if err != nil {
 		log.Printf("Failed to open image: %v", err)
@@ -424,6 +421,7 @@ func generateVideoThumbnail(videoPath string) image.Image {
 			"-ss", timePoint,
 			"-i", videoPath,
 			"-vframes", "1",
+			"-vf", fmt.Sprintf("scale='if(gt(iw,ih),%d,-2)':'if(gt(iw,ih),-2,%d)':flags=lanczos", thumbSize, thumbSize),
 			"-q:v", "2",
 			"-f", "image2pipe",
 			"-")
@@ -435,7 +433,7 @@ func generateVideoThumbnail(videoPath string) image.Image {
 		if err := cmd.Run(); err == nil {
 			img, _, err := image.Decode(&out)
 			if err == nil {
-				return resizeImage(img, thumbSize)
+				return img
 			}
 		}
 	}
@@ -490,8 +488,9 @@ func generateAllThumbnails() {
 		go func() {
 			defer wg.Done()
 			for path := range jobs {
-				thumbPath := filepath.Join(thumbsDir, filepath.Base(path)+".thumb.jpg")
-				fullPath := filepath.Join(mediaDir, path)
+				safeName := strings.ReplaceAll(path, "/", "_")
+				thumbPath := filepath.Join(thumbsDir, safeName+".thumb.jpg")
+				fullPath := filepath.Join(mediaDir, filepath.FromSlash(path))
 
 				needGenerate := false
 				thumbInfo, err1 := os.Stat(thumbPath)
@@ -578,8 +577,9 @@ func scanFiles() {
 		if err != nil {
 			return err
 		}
+		relPath, _ := filepath.Rel(mediaDir, path)
 		files = append(files, &MediaFile{
-			Path:    filepath.Base(path),
+			Path:    filepath.ToSlash(relPath),
 			Date:    info.ModTime(),
 			IsVideo: videoExts[ext],
 		})

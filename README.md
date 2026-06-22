@@ -1,59 +1,85 @@
-﻿# 🖼️ 媒体浏览器 / Media Browser
+# 媒体浏览器
 
-一个轻量级的局域网照片和视频浏览器。选择照片文件夹，直接开用。无需数据库、无需配置。
+一个简单的媒体浏览应用，支持在本地网络上浏览照片和视频。
 
-## 快速上手
+## 功能特性
 
-```bash
-git clone https://github.com/xiaoluhh/media-browser.git
-cd media-browser
-go build -o media-browser .
-./media-browser -dir /path/to/你的照片和视频
-```
+- 按日期分组显示媒体文件
+- 照片和视频分开查看
+- 支持视频缩略图（需要 FFmpeg）
+- 响应式设计，适配手机和桌面
+- 支持滑动、键盘和鼠标滚轮操作
+- 自动扫描新增文件
 
-**Windows 用户**：直接双击 `media-browser.exe`，会自动弹出文件夹选择窗口。
+## 快速开始
 
-浏览器打开 `http://localhost:8080` 即可浏览。
-
-## 局域网共享
-
-在同一局域网的其他设备上访问 `http://你的IP:8080` 即可。手机、平板、电脑都能用，支持 PWA 安装到主屏幕。
-
-## 功能
-
-- 📷 按日期自动分组
-- 🎬 视频播放（需 FFmpeg）
-- 🔍 大图查看器，双指缩放 + 拖拽平移
-- 👆 触摸滑动翻页
-- 🗑️ 多选批量删除
-- 📱 PWA，可安装到手机桌面
-- 🖥️ 响应式，手机/平板/电脑都适配
-
-## 参数
-
-| 参数 | 默认 | 说明 |
-|------|------|------|
-| `-dir` | 必填 | 媒体文件夹（不填则弹出选择窗口） |
-| `-port` | 8080 | 端口 |
-| `-thumbs` | thumbs | 缩略图缓存目录 |
-
-## 部署到树莓派 / Linux 服务器
+### 树莓派 / Linux
 
 ```bash
-git clone https://github.com/xiaoluhh/media-browser.git
-cd media-browser
-go build -o media-browser .
-./media-browser -dir /path/to/media
+./media-browser -dir /media/lat/disk2/tg -port 8080
 ```
 
-建议用 systemd 管理服务，开机自启。
+或使用启动脚本：
 
-## 要求
+```bash
+./start.sh /media/lat/disk2/tg
+```
 
-- Go 1.21+（仅构建时需要）
-- FFmpeg（可选，视频缩略图用）
-- Windows / Linux / macOS
+### Windows
 
-## 协议
+双击 `启动媒体浏览器.bat` 文件，选择照片文件夹即可。
 
-MIT
+或在命令行运行：
+
+```cmd
+media-browser-windows-x64.exe -dir "D:\Photos" -port 8080
+```
+
+然后在浏览器访问 http://localhost:8080
+
+## 命令行参数
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| -dir | 媒体文件夹路径（必须） | - |
+| -port | HTTP 端口 | 8080 |
+| -index | 索引文件路径 | media_index.json |
+| -thumbs | 缩略图缓存目录 | thumbs |
+
+## 编译说明
+
+### 编译 Linux ARM (树莓派)
+
+```bash
+GOOS=linux GOARCH=arm go build -o media-browser-linux-arm
+```
+
+### 编译 Linux x64
+
+```bash
+GOOS=linux GOARCH=amd64 go build -o media-browser-linux-x64
+```
+
+### 编译 Windows
+
+```bash
+GOOS=windows GOARCH=amd64 go build -o media-browser-windows-x64.exe
+```
+
+## 依赖
+
+### 视频缩略图
+
+需要安装 FFmpeg：
+
+- Linux: `sudo apt install ffmpeg`
+- Windows: 下载 ffmpeg.exe 放到程序目录
+
+照片功能不需要 FFmpeg。
+
+## 注意事项
+
+- 媒体文件按修改时间排序
+- 每小时自动扫描新文件
+- 缩略图缓存在 thumbs 文件夹
+- 索引保存在 media_index.json
