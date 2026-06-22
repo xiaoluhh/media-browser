@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
+	"image/color"
 	"image/jpeg"
 	"io/fs"
 	"log"
@@ -45,7 +46,7 @@ var (
 	lastScan     time.Time
 	scanInterval = time.Hour
 	videoExts    = map[string]bool{".mp4": true, ".avi": true, ".mov": true, ".mkv": true, ".webm": true}
-	imageExts    = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true, ".jpeg.jpg": true}
+	imageExts    = map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true}
 	thumbSize    = 400
 	ffmpegPath   string
 )
@@ -461,15 +462,59 @@ func resizeImage(img image.Image, maxSize int) image.Image {
 	}
 
 	result := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
+	xRatio := float64(width) / float64(newWidth)
+	yRatio := float64(height) / float64(newHeight)
+
 	for y := 0; y < newHeight; y++ {
 		for x := 0; x < newWidth; x++ {
-			srcX := (x * width) / newWidth
-			srcY := (y * height) / newHeight
-			result.Set(x, y, img.At(srcX, srcY))
+			srcX := float64(x)*xRatio + 0.5
+			srcY := float64(y)*yRatio + 0.5
+
+			x0 := int(srcX)
+			y0 := int(srcY)
+			x1 := x0 + 1
+			y1 := y0 + 1
+			if x1 >= width {
+				x1 = width - 1
+			}
+			if y1 >= height {
+				y1 = height - 1
+			}
+
+			xFrac := srcX - float64(x0)
+			yFrac := srcY - float64(y0)
+
+			c00 := img.At(x0, y0)
+			c01 := img.At(x0, y1)
+			c10 := img.At(x1, y0)
+			c11 := img.At(x1, y1)
+
+			r00, g00, b00, a00 := c00.RGBA()
+			r01, g01, b01, a01 := c01.RGBA()
+			r10, g10, b10, a10 := c10.RGBA()
+			r11, g11, b11, a11 := c11.RGBA()
+
+			r := bilinearInterp(r00, r01, r10, r11, xFrac, yFrac)
+			g := bilinearInterp(g00, g01, g10, g11, xFrac, yFrac)
+			b := bilinearInterp(b00, b01, b10, b11, xFrac, yFrac)
+			a := bilinearInterp(a00, a01, a10, a11, xFrac, yFrac)
+
+			result.Set(x, y, color.RGBA64{
+				R: uint16(r),
+				G: uint16(g),
+				B: uint16(b),
+				A: uint16(a),
+			})
 		}
 	}
 
 	return result
+}
+
+func bilinearInterp(c00, c01, c10, c11 uint32, xFrac, yFrac float64) float64 {
+	top := float64(c00)*(1-xFrac) + float64(c10)*xFrac
+	bot := float64(c01)*(1-xFrac) + float64(c11)*xFrac
+	return top*(1-yFrac) + bot*yFrac
 }
 
 func generateAllThumbnails() {
@@ -567,6 +612,10 @@ func scanFiles() {
 			return err
 		}
 		if d.IsDir() {
+			name := d.Name()
+			if strings.HasPrefix(name, ".") || name == thumbsDir {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 		ext := strings.ToLower(filepath.Ext(path))
