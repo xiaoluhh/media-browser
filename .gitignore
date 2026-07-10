@@ -1,0 +1,25 @@
+﻿# Binaries
+media-browser
+media-browser-*
+*.exe
+*.exe~
+
+# Runtime
+thumbs/
+media_index.json
+
+# Build output
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.bak
+*.bak2
+
+# IDE
+.vscode/
+.idea/
+*.zip
+thumbs/

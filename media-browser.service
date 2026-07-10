@@ -1,0 +1,14 @@
+[Unit]
+Description=Media Browser Server
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/html/media-browser
+ExecStart=/var/www/html/media-browser/media-browser -dir /media/lat/disk2/tg -port 80 -index /var/www/html/media-browser/media_index.json -thumbs /var/www/html/media-browser/thumbs
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
