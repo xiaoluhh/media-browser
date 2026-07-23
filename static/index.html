@@ -155,7 +155,7 @@
             color: #111;
         }
         .play-indicator::before { content: '▶'; margin-left: 3px; }
-        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); display: none; justify-content: center; align-items: center; z-index: 1000; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
         .lightbox.active { display: flex; }
         .lightbox-content { position: relative; width: 95vw; height: 90vh; display: flex; align-items: center; justify-content: center; background: #000; }
         .lightbox-content img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; }
@@ -228,6 +228,10 @@
             transition: all 0.3s ease; 
             z-index: 1010;
             box-shadow: 0 4px 12px rgba(231,76,60,0.4);
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
         }
         .lightbox-delete:hover { 
             background: rgba(231,76,60,1); 
@@ -298,6 +302,7 @@
     </div>
     <div class="delete-toast" id="deleteToast">✅ 删除成功！</div>
     <script>
+        let videoGen = 0;  // 视频代际计数器，防止僵尸音频
         let deferredPrompt;
         let allMedia = [], filteredMedia = [], currentIndex = 0, currentFilter = 'all';
         let touchStartX = 0, touchStartY = 0, touchStartTime = 0, ignoreSwipe = false;
@@ -459,6 +464,9 @@
                 let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
                 let touchMoved = false;
                 let lastTapTime = 0;
+                let swipeSelectActive = false;
+                let swipeAddMode = true;  // true=选中, false=取消选中
+                let swipedItems = new Set();
                 
                 // 触摸开始
                 el.addEventListener('touchstart', (e) => {
@@ -468,9 +476,11 @@
                     touchStartY = touch.clientY;
                     touchStartTime = Date.now();
                     touchMoved = false;
+                    swipeSelectActive = false;
+                    swipedItems = new Set();
                 });
                 
-                // 触摸移动（检测是否在滑动）
+                // 触摸移动
                 el.addEventListener('touchmove', (e) => {
                     if (e.touches.length !== 1) return;
                     const touch = e.touches[0];
@@ -478,12 +488,40 @@
                     const deltaY = Math.abs(touch.clientY - touchStartY);
                     if (deltaX > 8 || deltaY > 8) {
                         touchMoved = true;
+                        // 选择模式下：滑动选中
+                        if (selectMode) {
+                            e.preventDefault();
+                            if (!swipeSelectActive) {
+                                // 首次移动：决定是选中还是取消
+                                swipeSelectActive = true;
+                                const path = decodeURIComponent(el.dataset.path);
+                                swipeAddMode = !selectedFiles.has(path);
+                            }
+                            // 用 elementFromPoint 找手指下的 photo-item
+                            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                            const item = target ? target.closest('.photo-item') : null;
+                            if (item && item.dataset.path) {
+                                const p = decodeURIComponent(item.dataset.path);
+                                if (!swipedItems.has(p)) {
+                                    swipedItems.add(p);
+                                    if (swipeAddMode) {
+                                        selectedFiles.add(p);
+                                        item.classList.add('selected');
+                                    } else {
+                                        selectedFiles.delete(p);
+                                        item.classList.remove('selected');
+                                    }
+                                    updateActionButtons();
+                                }
+                            }
+                        }
                     }
                 });
                 
-                // 触摸结束（区分点击和滑动）
+                // 触摸结束
                 el.addEventListener('touchend', (e) => {
-                    if (touchMoved) return; // 滑动了，忽略
+                    if (swipeSelectActive) return;  // 滑动选中了，不触发点击
+                    if (touchMoved) return;
                     
                     const touch = e.changedTouches[0];
                     const deltaX = Math.abs(touch.clientX - touchStartX);
@@ -591,17 +629,17 @@
                 
                 if (data.deleted > 0) {
                     showDeleteToast();
-                } else if (data.failed > 0) {
-                    alert('删除失败！' + data.failed + ' 个文件未能删除。');
-                } else {
-                    alert('没有文件被删除。请刷新页面重试。');
+                    // 直接从数组里移除已删除的文件，不重新加载页面
+                    const deletedSet = new Set(filesToDelete);
+                    allMedia = allMedia.filter(m => !deletedSet.has(m.path));
+                    filterMedia();
+                    selectedFiles.clear();
+                    selectMode = false;
+                    updateActionButtons();
+                    const scrollY = window.scrollY;
+                    render();
+                    window.scrollTo(0, scrollY);
                 }
-                
-                allMedia = [];
-                selectedFiles.clear();
-                selectMode = false;
-                updateActionButtons();
-                await load();
             } catch (e) {
                 console.error('Delete error:', e);
                 alert('删除失败！请重试。错误信息：' + e.message);
@@ -609,15 +647,22 @@
         }
         
         function openLightbox() {
+            videoGen++;  // 新一代视频
+            const myGen = videoGen;
             const item = filteredMedia[currentIndex];
             const thumbUrl = safePath(item.path);
             
-            // 彻底停止旧视频（防止声音残留）
+            // 彻底杀死旧视频：移除DOM + 清src + 清source
             const oldVideo = document.querySelector('.lightbox-content video');
             if (oldVideo) {
+                oldVideo.onloadeddata = null;  // 防止僵尸回调
+                oldVideo.onerror = null;
                 oldVideo.pause();
-                oldVideo.removeAttribute('src');
+                oldVideo.src = '';
+                oldVideo.srcObject = null;
+                while (oldVideo.firstChild) oldVideo.removeChild(oldVideo.firstChild);
                 oldVideo.load();
+                oldVideo.remove();
             }
             clearVideoControls();
             document.getElementById('lightboxContent').innerHTML = '';
@@ -639,6 +684,7 @@
                 source.type = 'video/mp4';
                 video.appendChild(source);
                 video.onloadeddata = () => {
+                    if (videoGen !== myGen) { video.muted = true; video.pause(); return; }
                     video.muted = false;
                     video.play();
                 };

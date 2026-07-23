@@ -13,6 +13,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -363,8 +364,12 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func thumbHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "max-age=86400")
+	w.Header().Set("Cache-Control", "no-cache, must-revalidate")
 	path := strings.TrimPrefix(r.URL.Path, "/thumb/")
+	// URL解码：前端用encodeURIComponent，这里解码回原始中文路径
+	if decoded, err := url.PathUnescape(path); err == nil {
+		path = decoded
+	}
 	safeName := strings.ReplaceAll(path, "/", "_")
 	thumbPath := filepath.Join(thumbsDir, safeName+".thumb.jpg")
 	fullPath := filepath.Join(mediaDir, filepath.FromSlash(path))
